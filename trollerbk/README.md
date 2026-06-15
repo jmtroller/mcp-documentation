@@ -1,6 +1,6 @@
 # TrollerBk — MCP
 
-Public documentation for the **TrollerBk** [Model Context Protocol](https://modelcontextprotocol.io/) server. It exposes market-wide US business bankruptcy intelligence (filings, case screening, market summaries, EIN lookups, docket access, court documents) plus personalized custom subscriber reports.
+Public documentation for the **TrollerBk** [Model Context Protocol](https://modelcontextprotocol.io/) server. It exposes market-wide US business bankruptcy intelligence (filings, case screening, EIN lookups, docket access, court documents) plus personalized custom subscriber reports.
 
 Unlike PACER (which requires knowing a specific case), TrollerBk answers cross-case and market questions.
 
@@ -75,14 +75,6 @@ Full case record for a single bankruptcy by TrollerBk `simple_name` identifier.
 | `simple_name` | string | yes | TrollerBk simpleName (e.g. `acme-corp-24-00123`) |
 
 Returns `caseId` and core fields; `simpleName`, `fullCaseNumber`, and lead flag are not included in the response.
-
-### `get_market_summary`
-
-Market-wide filing statistics: totals, breakdown by chapter, top states, top industries.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `days` | integer | Trailing window (1–365); default 30 |
 
 ### `search_by_ein`
 
