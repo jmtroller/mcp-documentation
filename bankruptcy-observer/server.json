@@ -5,7 +5,7 @@
   "description": "US business bankruptcy MCP: filings, dockets, documents, case summaries. Free tier + subscription.",
   "version": "1.1.0",
   "repository": {
-    "url": "https://github.com/jmtroller/mcp-documentation",
+    "url": "https://github.com/jmtroller/mcp-documentation/tree/main/bankruptcy-observer",
     "source": "github",
     "subfolder": "bankruptcy-observer"
   },

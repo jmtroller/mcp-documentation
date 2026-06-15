@@ -5,7 +5,7 @@
   "description": "MCP server for US nursing facility search and ownership lookup (NursingHomeDatabase).",
   "version": "1.0.1",
   "repository": {
-    "url": "https://github.com/jmtroller/mcp-documentation",
+    "url": "https://github.com/jmtroller/mcp-documentation/tree/main/nursing-home-database",
     "source": "github",
     "subfolder": "nursing-home-database"
   },
