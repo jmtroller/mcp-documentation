@@ -3,9 +3,10 @@
   "name": "com.bankruptcyobserver/mcp",
   "title": "Bankruptcy Observer",
   "description": "US business bankruptcy MCP: filings, dockets, documents, case summaries. Free tier + subscription.",
-  "version": "1.1.0",
+  "version": "1.2.1",
+  "websiteUrl": "https://jmtroller.github.io/mcp-documentation/bankruptcy-observer/",
   "repository": {
-    "url": "https://github.com/jmtroller/mcp-documentation/tree/main/bankruptcy-observer",
+    "url": "https://github.com/jmtroller/mcp-documentation",
     "source": "github",
     "subfolder": "bankruptcy-observer"
   },

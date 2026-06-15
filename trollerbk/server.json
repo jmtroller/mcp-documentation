@@ -3,9 +3,10 @@
   "name": "com.trollerbk/mcp",
   "title": "TrollerBk",
   "description": "TrollerBk MCP: US bankruptcy market intelligence, case search, dockets, documents. Auth required.",
-  "version": "1.0.0",
+  "version": "1.0.1",
+  "websiteUrl": "https://jmtroller.github.io/mcp-documentation/trollerbk/",
   "repository": {
-    "url": "https://github.com/jmtroller/mcp-documentation/tree/main/trollerbk",
+    "url": "https://github.com/jmtroller/mcp-documentation",
     "source": "github",
     "subfolder": "trollerbk"
   },

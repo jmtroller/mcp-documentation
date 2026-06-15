@@ -3,9 +3,10 @@
   "name": "com.seniorhealthdatabase/mcp",
   "title": "SeniorHealthDatabase",
   "description": "SeniorHealthDatabase MCP: dialysis, home health, hospice, and hospital search. Public access.",
-  "version": "1.0.0",
+  "version": "1.0.1",
+  "websiteUrl": "https://jmtroller.github.io/mcp-documentation/seniorhealthdatabase/",
   "repository": {
-    "url": "https://github.com/jmtroller/mcp-documentation/tree/main/seniorhealthdatabase",
+    "url": "https://github.com/jmtroller/mcp-documentation",
     "source": "github",
     "subfolder": "seniorhealthdatabase"
   },
