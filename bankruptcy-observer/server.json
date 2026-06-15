@@ -15,7 +15,7 @@
       "headers": [
         {
           "name": "Authorization",
-          "description": "Bearer <MCP API token> for subscriber tools. Optional for free-tier exact-name and 7-digit case-number lookups. Also supports X-API-Key.",
+          "description": "Bearer MCP API token for subscriber tools. Optional for free-tier lookups. X-API-Key also supported.",
           "isRequired": false,
           "isSecret": true
         }

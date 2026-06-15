@@ -15,7 +15,7 @@
       "headers": [
         {
           "name": "Authorization",
-          "description": "Bearer <API token>. Obtain via trollerbk.com subscription. Also supports X-API-Key and X-Client-Email + X-API-Key.",
+          "description": "Bearer API token from trollerbk.com subscription. Also supports X-API-Key and X-Client-Email.",
           "isRequired": true,
           "isSecret": true
         }
