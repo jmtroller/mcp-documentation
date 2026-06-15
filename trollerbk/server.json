@@ -1,0 +1,25 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.trollerbk/mcp",
+  "title": "TrollerBk",
+  "description": "MCP server for US business bankruptcy market intelligence: filings, case search, market summaries, EIN lookups, docket and document access, and personalized custom subscriber reports. Authentication required.",
+  "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/jmtroller/mcp-documentation",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.trollerbk.com/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer <API token>. Obtain via trollerbk.com subscription. Also supports X-API-Key and X-Client-Email + X-API-Key.",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+title: MCP Server Documentation
+description: Public documentation for Model Context Protocol servers running in Laravel13
+theme: jekyll-theme-cayman
+markdown: GFM
+baseurl: "/mcp-documentation"
+url: "https://jmtroller.github.io"
