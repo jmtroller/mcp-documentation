@@ -24,7 +24,7 @@ Routes are defined in `Laravel13/routes/mcp.php`. Each server has a dedicated co
 
 ## MCP Registry manifests
 
-Each server folder includes a [`server.json`](https://modelcontextprotocol.io/docs/registry) for the official MCP Registry:
+Each server folder includes a [`server.json`](https://modelcontextprotocol.io/docs/registry) for the official MCP Registry. The `repository.subfolder` field points to that server's directory within this monorepo:
 
 | Server | Registry name | Manifest |
 |--------|-----------------|----------|
