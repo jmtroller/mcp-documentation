@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "com.seniorhealthdatabase/mcp",
   "title": "SeniorHealthDatabase",
-  "description": "MCP server for US senior healthcare facility search and details: dialysis, home health, hospice, hospitals (SeniorHealthDatabase). Free public access.",
+  "description": "SeniorHealthDatabase MCP: dialysis, home health, hospice, and hospital search. Public access.",
   "version": "1.0.0",
   "repository": {
     "url": "https://github.com/jmtroller/mcp-documentation",
