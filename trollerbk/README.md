@@ -140,24 +140,10 @@ Examples that may appear depending on your subscription:
 
 - `custom_admin_exp`
 - `custom_sale_motion`
-- `custom_final_report`
 - `custom_schedules`
 - `custom_adversary_proceedings`
-- `custom_plan_approval_sm_11`
-- `custom_disc_small_cases`
-- `custom_foreign_creditors`
-- `custom_joint`
-- `custom_c7trustees`
-- `custom_summit_admin_exp`
 
-Shared parameters for custom report tools:
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `start_date` | string | YYYY-MM-DD start |
-| `end_date` | string | YYYY-MM-DD end |
-| `limit` | integer | Max results for large reports |
-| `claim_id` | string | For Traders or case-specific reports |
 
 Exact custom tools and schemas are returned live from `tools/list` for your token.
 
