@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "com.trollerbk/mcp",
   "title": "TrollerBk",
-  "description": "TrollerBk MCP: US bankruptcy market intelligence, case search, dockets, documents. Auth required.",
-  "version": "1.0.2",
+  "description": "TrollerBk MCP: US bankruptcy market intelligence, case search, dockets, documents. Auth required (Bearer, X-API-Key, or ?api_key= / /mcp/t/{token} for header-less clients).",
+  "version": "1.0.3",
   "websiteUrl": "https://jmtroller.github.io/mcp-documentation/trollerbk/",
   "repository": {
     "url": "https://github.com/jmtroller/mcp-documentation",
@@ -17,7 +17,7 @@
       "headers": [
         {
           "name": "Authorization",
-          "description": "Bearer API token from trollerbk.com subscription. Also supports X-API-Key and X-Client-Email.",
+          "description": "Bearer API token from trollerbk.com subscription. Also supports X-API-Key and X-Client-Email. Header-less clients may use ?api_key= or /mcp/t/{token} instead.",
           "isRequired": true,
           "isSecret": true
         }

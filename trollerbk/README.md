@@ -22,13 +22,30 @@ Send a standard MCP session: `initialize` → `notifications/initialized` (optio
 
 ## Authentication
 
-All requests require a valid TrollerBk credential:
+All requests require a valid TrollerBk credential. Prefer headers / OAuth when the client supports them:
 
 - `Authorization: Bearer <your-api-token>`
 - `X-API-Key: <your-api-token>` (optionally with `X-Client-Email`)
 - OAuth Bearer token via the shared MCP OAuth flow
 
-API tokens are obtained via subscription. Requests without valid credentials return a JSON-RPC auth error (HTTP 401).
+### URL token (header-less clients, e.g. Grok web connectors)
+
+Some clients cannot attach `Authorization` headers or complete OAuth. For those, put the API token in the MCP URL. Treat the full URL as a secret (do not share or commit it).
+
+| Form | URL |
+|------|-----|
+| **Query (recommended)** | `https://mcp.trollerbk.com/mcp?api_key=YOUR_TOKEN` |
+| **Path** | `https://mcp.trollerbk.com/mcp/t/YOUR_TOKEN` |
+
+Also accepted as query keys: `api_token`, `access_token`, `token`. Leave the connector’s auth field empty when the key is already in the URL.
+
+```bash
+curl -X POST "https://mcp.trollerbk.com/mcp?api_key=YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+```
+
+API tokens are obtained via subscription (subscriber dashboard MCP setup shows a copyable Grok URL). Requests without valid credentials return a JSON-RPC auth error (HTTP 401).
 
 OAuth discovery endpoints are available at the MCP host root:
 

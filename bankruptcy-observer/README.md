@@ -27,6 +27,10 @@ The BKO middleware never returns HTTP 401. Instead:
   - `Authorization: Bearer <api_token>`
   - `X-API-Key: <api_token>` (optionally with `X-Client-Email`)
   - OAuth Bearer token from the shared MCP OAuth flow (`/oauth/token`)
+  - **URL token** (header-less clients, e.g. Grok web connectors):
+    - Query: `https://mcp.bankruptcyobserver.com/mcp?api_key=YOUR_TOKEN`
+    - Path: `https://mcp.bankruptcyobserver.com/mcp/t/YOUR_TOKEN`
+    - Prefer headers/OAuth when available; treat the full URL as a secret.
 
 Website subscribers get MCP access included. Tokens are visible in the subscriber dashboard at `/subscriber/mcp-setup`. New users can also call `list_plans_tool` and `purchase_plan_tool` without auth to start Stripe checkout.
 
