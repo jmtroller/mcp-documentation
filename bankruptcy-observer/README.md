@@ -132,7 +132,7 @@ Cases filed in a date range on `dateFiled`. Omitting both dates defaults to yest
 
 #### `get_docket_entries_tool`
 
-Docket entries for a case. Each entry includes `docket_id` for document tools.
+Docket entries for a case, ordered by `itemNumber` ascending. Each entry includes `docket_id` for document tools. `limit` is capped at 50; use `skip` (or `offset`, or 1-based `page`) to walk past the first block. The response includes `total`, `skip`, `limit`, `returned`, and `has_more`.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
@@ -142,6 +142,9 @@ Docket entries for a case. Each entry includes `docket_id` for document tools.
 | `court_id` | string | Optional court filter |
 | `court_state` | string | Two-letter state to disambiguate |
 | `limit` | integer | Max entries (default 25, max 50) |
+| `skip` | integer | Number of entries to skip (default 0). Example: `limit=50, skip=50` returns items 51–100 |
+| `offset` | integer | Alias for `skip` |
+| `page` | integer | 1-based page; equivalent to `skip=(page-1)*limit`. Ignored if `skip` or `offset` is set |
 | `live_update` | boolean | Refresh from court sources first |
 
 #### `get_case_summary_tool`
