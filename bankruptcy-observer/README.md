@@ -132,7 +132,7 @@ Cases filed in a date range on `dateFiled`. Omitting both dates defaults to yest
 
 #### `get_docket_entries_tool`
 
-Docket entries for a case, ordered by `itemNumber` ascending. Each entry includes `docket_id` for document tools. `limit` is capped at 50; use `skip` (or `offset`, or 1-based `page`) to walk past the first block. The response includes `total`, `skip`, `limit`, `returned`, and `has_more`.
+Docket entries for a case, ordered by `itemNumber` ascending. Each entry includes the full PACER `itemText` (never sliced) and `docket_id` for document tools. `limit` is capped at 50; use `skip` (or `offset`, or 1-based `page`) to walk past the first block. Optional `docket_id`, `item_number`, or `item_from`/`item_to` fetch specific entries. A page may contain fewer than `limit` entries so every caption stays complete for MCP clients. The response includes `total`, `skip`, `limit`, `returned`, and `has_more`.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
@@ -141,7 +141,11 @@ Docket entries for a case, ordered by `itemNumber` ascending. Each entry include
 | `short_case_number` | string | Alias for `case_number` |
 | `court_id` | string | Optional court filter |
 | `court_state` | string | Two-letter state to disambiguate |
-| `limit` | integer | Max entries (default 25, max 50) |
+| `docket_id` | string | Return only this docket entry (full `itemText`) |
+| `item_number` | integer | Return only this docket item number (full `itemText`) |
+| `item_from` | integer | Filter to `itemNumber >=` this value |
+| `item_to` | integer | Filter to `itemNumber <=` this value |
+| `limit` | integer | Max entries (default 25, max 50). Captions are never cut; a page may return fewer when text is long |
 | `skip` | integer | Number of entries to skip (default 0). Example: `limit=50, skip=50` returns items 51–100 |
 | `offset` | integer | Alias for `skip` |
 | `page` | integer | 1-based page; equivalent to `skip=(page-1)*limit`. Ignored if `skip` or `offset` is set |
