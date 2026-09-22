@@ -14,7 +14,7 @@ Public documentation for the **Nursing Home Database** [Model Context Protocol](
 | **URL** | `https://mcp.nursinghomedatabase.com/mcp` |
 | **Auth** | None required (public access) |
 | **Server name** | `nhd-mcp` |
-| **Version** | `1.3.0` |
+| **Version** | `1.4.0` |
 
 Send a standard MCP session: `initialize` → `notifications/initialized` (optional; may receive HTTP 204) → `tools/list` → `tools/call` as needed.
 
@@ -24,6 +24,7 @@ Send a standard MCP session: `initialize` → `notifications/initialized` (optio
 |------|---------|
 | `search_facilities` | Finds certified SNFs near an address (or by name/city/state/ownership type) so you can shortlist more than three homes using hours, turnover, and inspection scores |
 | `search_facilities_by_ownership` | Same search, with CMS `ownership` type required (For profit / Non profit / Government, or an exact value from `list_distinct_values`) |
+| `summarize_facilities` | National or grouped stats (n, mean, min, max; optional median) for nurse hours, turnover, ratings, beds, fines. Prefer this over paging `search_facilities` |
 | `get_facility` | Opens one home by CMS provider number or site slug, with the same hours, turnover, inspection, beds, and penalty fields as search |
 | `compare_facilities` | Same schema for up to 25 CCNs/slugs — prefer this over looping `get_facility` (MCP is 60 req/min) |
 | `get_facility_changes` | Diff one home across two CMS monthly files (monitor) |
@@ -41,7 +42,7 @@ Exact `inputSchema` objects are returned in `tools/list`.
 By default every lookup uses the **latest** CMS monthly file. To retrieve a prior month:
 
 1. Call `list_file_dates` (returns `current`, `filedates` newest first, and `known_gaps` for unpublished months).
-2. Pass one of those dates as `filedate` (`YYYY-MM-DD` or `YYYY-MM`) on `search_facilities`, `search_facilities_by_ownership`, `get_facility`, `get_facility_ownership`, `search_owners`, `get_owner`, or `list_distinct_values`.
+2. Pass one of those dates as `filedate` (`YYYY-MM-DD` or `YYYY-MM`) on `search_facilities`, `search_facilities_by_ownership`, `summarize_facilities`, `get_facility`, `get_facility_ownership`, `search_owners`, `get_owner`, or `list_distinct_values`.
 
 CMS snapshots are stored as the first of the month (`YYYY-MM-01`). A value like `2026-07` or `2026-07-15` is normalized to `2026-07-01`. Unknown dates return a validation error — call `list_file_dates` rather than guessing.
 
@@ -135,6 +136,31 @@ Same result schema as `search_facilities`, with `ownership` required. Use this w
 | `address` | string | no | Origin address for distance search |
 | `filedate` | string | no | CMS monthly snapshot from `list_file_dates` |
 
+### `summarize_facilities`
+
+Aggregate numeric CMS ProviderInfo fields across certified SNFs. Prefer this over paging `search_facilities` for national or grouped stats (government vs private hours, state means, etc.). Means are **facility-equal** (not bed-weighted). Facilities missing a metric are excluded from that metric’s n/mean/min/max only — values are not imputed. Not causal. Not a substitute for `get_facility` on a named home.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `metrics` | array of strings | yes | 1–20 keys: `tothrd`, `rnhrd`, `weekend_tothrd`, `weekend_rnhrd`, `totalnursingstaffturnover`, `registerednurseturnover`, `weighted_all_cycles_score`, `overall_rating`, `survey_rating`, `staffing_rating`, `quality_rating`, `bedcert`, `restot`, `fine_tot`, `fine_cnt`, `occupancy`. Synonyms: `total_nurse_hours`, `nurse_turnover`, `rn_turnover`, `survey_score` |
+| `group_by` | string | no | `ownership`, `ownership_kind` (Government / For profit / Non profit), `state`, `overall_rating`, `staffing_rating`, `survey_rating`, `quality_rating`, `sffstatus`, `abuse_icon`. Omit for one national (or filter-scoped) row |
+| `ownership` | string | no | Same prefix/exact filter as `search_facilities` |
+| `state` | string | no | Two-letter state |
+| `city` | string | no | Requires `state` |
+| `zip` | string | no | ZIP filter |
+| `abuse_icon` | string | no | Same as `search_facilities` |
+| `sffstatus` | string | no | Same as `search_facilities` |
+| `min_overall_rating` | integer | no | 1–5 |
+| `max_overall_rating` | integer | no | 1–5 |
+| `include_median` | boolean | no | Default false. When true, each stats object includes `median` |
+| `filedate` | string | no | CMS monthly snapshot from `list_file_dates` |
+
+REST: `GET /api/v1/nh/facilities/summary?metrics=tothrd,rnhrd&group_by=ownership_kind&include_median=true`
+
+Response `groups[]` each have `group_key`, `group_label`, `facilities_in_group`, and `stats` keyed by canonical metric (`n`, `mean`, `min`, `max`, optional `median`, `unit`). `facilities_in_scope` is the filter-matched count; per-metric `n` is the non-null count in that group. Unknown metric keys return `invalid_metric` with the allowed list.
+
+0% / 100% turnover and near-zero HPRD can be reporting artifacts.
+
 ### `list_distinct_values`
 
 Lists distinct CMS `ProviderInfo` values and row counts for a field in the active monthly snapshot. Omit `field` to see the allowed field catalog. `field=city` requires `state`.
@@ -210,6 +236,7 @@ JSON discovery APIs are also available under the main site:
 - `GET https://www.nursinghomedatabase.com/api/v1/nh/facilities?state=TX&filedate=2026-07-01`
 - `GET https://www.nursinghomedatabase.com/api/v1/nh/field-values?field=ownership`
 - `GET https://www.nursinghomedatabase.com/api/v1/nh/facilities?state=TX&ownership=Non+profit`
+- `GET https://www.nursinghomedatabase.com/api/v1/nh/facilities/summary?metrics=tothrd,rnhrd,totalnursingstaffturnover&group_by=ownership_kind`
 
 REST callers can pass `filedate=YYYY-MM-DD` (or `YYYY-MM`) on facilities and owners endpoints the same way MCP tools do. `min_overall_rating`, `max_overall_rating`, `abuse_icon`, `sffstatus`, and `ownership` are query parameters on `GET /api/v1/nh/facilities`.
 

@@ -3,7 +3,7 @@
   "name": "com.nursinghomedatabase/mcp",
   "title": "Nursing Home Database",
   "description": "Find US skilled nursing facilities near an address with CMS nurse hours, turnover, inspection scores, ratings, and ownership (NursingHomeDatabase).",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "websiteUrl": "https://jmtroller.github.io/mcp-documentation/nursing-home-database/",
   "repository": {
     "url": "https://github.com/jmtroller/mcp-documentation",
