@@ -27,7 +27,7 @@ Send a standard MCP session: `initialize` → `notifications/initialized` (optio
 | `summarize_facilities` | National or grouped stats (n, mean, min, max; optional median) for nurse hours, turnover, ratings, beds, fines. Prefer this over paging `search_facilities` |
 | `get_facility` | Opens one home by CMS provider number or site slug, with the same hours, turnover, inspection, beds, and penalty fields as search |
 | `compare_facilities` | Same schema for up to 25 CCNs/slugs — prefer this over looping `get_facility` (MCP is 60 req/min) |
-| `get_facility_changes` | Diff one home across two CMS monthly files (monitor) |
+| `get_facility_changes` | Field-level diff of one home across two CMS monthly files. Defaults to the latest file versus the prior snapshot. Not owner names |
 | `get_facility_ownership` | Lists who owns a home and in what role |
 | `search_owners` | Finds nursing-home owners by name |
 | `get_owner` | Opens an owner’s portfolio of certified SNFs |
@@ -42,7 +42,7 @@ Exact `inputSchema` objects are returned in `tools/list`.
 By default every lookup uses the **latest** CMS monthly file. To retrieve a prior month:
 
 1. Call `list_file_dates` (returns `current`, `filedates` newest first, and `known_gaps` for unpublished months).
-2. Pass one of those dates as `filedate` (`YYYY-MM-DD` or `YYYY-MM`) on `search_facilities`, `search_facilities_by_ownership`, `summarize_facilities`, `get_facility`, `get_facility_ownership`, `search_owners`, `get_owner`, or `list_distinct_values`.
+2. Pass one of those dates as `filedate` (`YYYY-MM-DD` or `YYYY-MM`) on `search_facilities`, `search_facilities_by_ownership`, `summarize_facilities`, `compare_facilities`, `get_facility`, `get_facility_ownership`, `search_owners`, `get_owner`, or `list_distinct_values`. `get_facility_changes` does not take `filedate`; pass `from` and `to`.
 
 CMS snapshots are stored as the first of the month (`YYYY-MM-01`). A value like `2026-07` or `2026-07-15` is normalized to `2026-07-01`. Unknown dates return a validation error — call `list_file_dates` rather than guessing.
 
@@ -171,6 +171,15 @@ Lists distinct CMS `ProviderInfo` values and row counts for a field in the activ
 | `state` | string | no | Two-letter state (required for `city`) |
 | `filedate` | string | no | CMS monthly snapshot from `list_file_dates` |
 
+### `compare_facilities`
+
+Same decision fields as `search_facilities`, for up to 25 CMS provider numbers or web slugs, on one snapshot. Ids past 25 are dropped. This is not a month-to-month diff; use `get_facility_changes` for that.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `ids` | array of strings | yes | CMS provider numbers or web slugs. Maximum 25 |
+| `filedate` | string | no | CMS monthly snapshot from `list_file_dates` |
+
 ### `get_facility`
 
 Opens one home by CMS provider number (`provnum`) or site slug. The `facility` object matches a `search_facilities` row (hours, turnover, inspection, beds, penalties, maps links).
@@ -179,6 +188,16 @@ Opens one home by CMS provider number (`provnum`) or site slug. The `facility` o
 |-----------|------|----------|-------------|
 | `id` | string | yes | Provider number or web slug |
 | `filedate` | string | no | CMS monthly snapshot from `list_file_dates` |
+
+### `get_facility_changes`
+
+Diff one home across two CMS monthly snapshots. Omit `from` and `to` to compare the latest file with the previous snapshot. `changes` is field-level: stars, nurse hours, turnover, weighted inspection score, the CMS abuse icon, Special Focus status, ownership type (for-profit / nonprofit / government, not the owner’s name), fines, beds, residents, and occupancy. A home missing from one of the two files is `found.from` or `found.to` false. That is not a closure.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | string | yes | CMS provider number or web slug |
+| `from` | string | no | Earlier filedate (`YYYY-MM-DD` or `YYYY-MM`). Omit to use the snapshot before `to` |
+| `to` | string | no | Later filedate. Omit to use the latest CMS file |
 
 ### `get_facility_ownership`
 
