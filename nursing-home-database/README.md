@@ -61,6 +61,7 @@ Finds certified SNFs near an address so you can shortlist more than three homes 
 | `min_overall_rating` | integer | Minimum CMS overall star rating (already on REST; also on this MCP tool) |
 | `max_overall_rating` | integer | Maximum CMS overall star rating (already on REST; also on this MCP tool) |
 | `abuse_icon` | string | Filter by CMS abuse icon (`Y` / `N`, `true` / `false`) (already on REST; also on this MCP tool) |
+| `icon_hi_perf` | string | CMS high-performing icon. `Y` keeps homes currently eligible for a Risk-Based Survey. Point-in-time; not a permanent award. Present from the September 2026 CMS file onward |
 | `sffstatus` | string | When set, keep homes that have a CMS Special Focus Facility (or candidate) status (already on REST; also on this MCP tool) |
 | `ownership` | string | CMS ownership type (`ProviderInfo.ownership`). Case-insensitive. Prefixes `For profit`, `Non profit`, and `Government` match that kind. Call `list_distinct_values` with `field=ownership` for the 13 exact values |
 | `sort` | string | Sort key (see [Sort keys](#sort-keys) below) |
@@ -92,6 +93,9 @@ Identity, location, and CMS star ratings are included (`provnum`, `web`, `provna
 | `fine_tot` | Total fines (dollars) |
 | `fine_cnt` | Number of fines |
 | `abuse_icon` | CMS abuse icon |
+| `icon_hi_perf` | CMS high-performing icon (`Y`/`N`). Current eligibility for a Risk-Based Survey. Empty on snapshots before September 2026 |
+| `rating_cycle_1_survey_footnote` | Footnote on the most recent standard survey. `29` means that survey was a Risk-Based Survey |
+| `rating_cycle_2_survey_footnote` | Footnote on the prior standard survey. `29` means that survey was a Risk-Based Survey |
 | `sffstatus` | Special Focus Facility status |
 | `chain_id` | Chain identifier |
 | `chain_name` | Chain name |
@@ -143,12 +147,13 @@ Aggregate numeric CMS ProviderInfo fields across certified SNFs. Prefer this ove
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `metrics` | array of strings | yes | 1–20 keys: `tothrd`, `rnhrd`, `weekend_tothrd`, `weekend_rnhrd`, `totalnursingstaffturnover`, `registerednurseturnover`, `weighted_all_cycles_score`, `overall_rating`, `survey_rating`, `staffing_rating`, `quality_rating`, `bedcert`, `restot`, `fine_tot`, `fine_cnt`, `occupancy`. Synonyms: `total_nurse_hours`, `nurse_turnover`, `rn_turnover`, `survey_score` |
-| `group_by` | string | no | `ownership`, `ownership_kind` (Government / For profit / Non profit), `state`, `overall_rating`, `staffing_rating`, `survey_rating`, `quality_rating`, `sffstatus`, `abuse_icon`. Omit for one national (or filter-scoped) row |
+| `group_by` | string | no | `ownership`, `ownership_kind` (Government / For profit / Non profit), `state`, `overall_rating`, `staffing_rating`, `survey_rating`, `quality_rating`, `sffstatus`, `abuse_icon`, `icon_hi_perf`. Omit for one national (or filter-scoped) row |
 | `ownership` | string | no | Same prefix/exact filter as `search_facilities` |
 | `state` | string | no | Two-letter state |
 | `city` | string | no | Requires `state` |
 | `zip` | string | no | ZIP filter |
 | `abuse_icon` | string | no | Same as `search_facilities` |
+| `icon_hi_perf` | string | no | Same as `search_facilities` |
 | `sffstatus` | string | no | Same as `search_facilities` |
 | `min_overall_rating` | integer | no | 1–5 |
 | `max_overall_rating` | integer | no | 1–5 |
@@ -167,7 +172,7 @@ Lists distinct CMS `ProviderInfo` values and row counts for a field in the activ
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `field` | string | no | `ownership`, `state`, `sffstatus`, `abuse_icon`, `certification`, `chainname`, `overall_rating`, … |
+| `field` | string | no | `ownership`, `state`, `sffstatus`, `abuse_icon`, `icon_hi_perf`, `certification`, `chainname`, `overall_rating`, … |
 | `state` | string | no | Two-letter state (required for `city`) |
 | `filedate` | string | no | CMS monthly snapshot from `list_file_dates` |
 
@@ -191,7 +196,7 @@ Opens one home by CMS provider number (`provnum`) or site slug. The `facility` o
 
 ### `get_facility_changes`
 
-Diff one home across two CMS monthly snapshots. Omit `from` and `to` to compare the latest file with the previous snapshot. `changes` is field-level: stars, nurse hours, turnover, weighted inspection score, the CMS abuse icon, Special Focus status, ownership type (for-profit / nonprofit / government, not the owner’s name), fines, beds, residents, and occupancy. A home missing from one of the two files is `found.from` or `found.to` false. That is not a closure.
+Diff one home across two CMS monthly snapshots. Omit `from` and `to` to compare the latest file with the previous snapshot. `changes` is field-level: stars, nurse hours, turnover, weighted inspection score, the CMS abuse icon, the high-performing icon, Special Focus status, ownership type (for-profit / nonprofit / government, not the owner’s name), fines, beds, residents, and occupancy. A home missing from one of the two files is `found.from` or `found.to` false. That is not a closure.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -257,7 +262,7 @@ JSON discovery APIs are also available under the main site:
 - `GET https://www.nursinghomedatabase.com/api/v1/nh/facilities?state=TX&ownership=Non+profit`
 - `GET https://www.nursinghomedatabase.com/api/v1/nh/facilities/summary?metrics=tothrd,rnhrd,totalnursingstaffturnover&group_by=ownership_kind`
 
-REST callers can pass `filedate=YYYY-MM-DD` (or `YYYY-MM`) on facilities and owners endpoints the same way MCP tools do. `min_overall_rating`, `max_overall_rating`, `abuse_icon`, `sffstatus`, and `ownership` are query parameters on `GET /api/v1/nh/facilities`.
+REST callers can pass `filedate=YYYY-MM-DD` (or `YYYY-MM`) on facilities and owners endpoints the same way MCP tools do. `min_overall_rating`, `max_overall_rating`, `abuse_icon`, `icon_hi_perf`, `sffstatus`, and `ownership` are query parameters on `GET /api/v1/nh/facilities`.
 
 MCP and REST share the same underlying data layer.
 
