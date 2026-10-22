@@ -109,6 +109,16 @@ Resolve a court case number to basic case records.
 |-----------|------|----------|-------------|
 | `case_number` | string | yes | Short court case number (e.g. `24-10001`) |
 
+### `case_status`
+
+Refresh one case from the court case summary and return the dates the court has on file. This calls the court, so use it for one case at a time. The response identifies the case by `simpleName` and includes `name`, `chapter`, and `dates`. Only dates that have a value are returned: filed, last filing, converted, plan confirmed, discharged (including joint), dismissed (including joint), terminated, closed, and the time the summary was saved. A calendar date is `YYYY-MM-DD`.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `simple_name` | string | TrollerBk simpleName. `simpleName` is accepted as an alias |
+| `case_id` | string | Internal TrollerBk caseId |
+| `case_number` | string | Short court case number. If more than one case uses it, pass `simple_name` or `case_id` |
+
 ### `get_docket`
 
 Docket entries for a case. Returns `docketId`, `caseId`, `itemText`, `itemDate`, `pageCount`. Defaults to the first 10 items ordered by `itemNumber` ascending.
@@ -148,6 +158,35 @@ Request (pull if needed + charge if applicable) the full PDF document. Prefer ca
 | `docket_ids` | array | Multiple docket IDs |
 | `pacer_rss_ids` | array | Multiple pacer RSS IDs |
 | `zip` | boolean | Deliver all documents as one zip with manifest |
+
+### `get_claims_register`
+
+Claims register for one case: creditor, claim number, filed date, amounts, status, and the proof-of-claim documents linked to each claim. Use a POC entry's `claims_register_doc_id` with `get_poc_document`.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `simple_name` | string | TrollerBk simpleName |
+| `case_id` | string | Internal TrollerBk caseId |
+| `case_number` | string | Short court case number |
+| `creditor` | string | Creditor name contains this text |
+| `description` | string | Description contains this text |
+| `claim_number` | string | Exact claim number |
+| `search` | string | Free-text match against creditor, description, or claim number |
+| `date_from` | string | Claims filed on or after (YYYY-MM-DD) |
+| `date_to` | string | Claims filed on or before (YYYY-MM-DD) |
+| `limit` | integer | Max claims (1–500). Default 100 |
+| `offset` | integer | Claims to skip |
+
+### `get_poc_document`
+
+Retrieve one or more proof-of-claim PDFs. A single document returns a download link. Several are delivered as one zip with a manifest. Set `cost_only` to preview the cost without pulling or charging.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `claims_register_doc_id` | string | One proof-of-claim document id from `get_claims_register` |
+| `claims_register_doc_ids` | array | Several proof-of-claim document ids |
+| `cost_only` | boolean | Preview cost only |
+| `zip` | boolean | Deliver as a zip. Forced when more than one id is requested |
 
 ## Custom report tools (`custom_*`)
 

@@ -55,7 +55,7 @@ Search US business bankruptcy cases by debtor name.
 | `search_term` | string | Debtor name (prefix or `*contains` for paid wildcard search) |
 | `limit` | integer | Max results (1–100); default 25 |
 | `skip` | integer | Pagination offset |
-| `court_id` | string | Optional court filter |
+| `court` | string | Court name as returned on a case, for example `Delaware` or `Texas Southern` |
 | `court_state` | string | Two-letter state to filter court name |
 
 **Free:** exact/prefix match without `*`. **Paid:** `*term` contains search and full fields.
@@ -67,7 +67,7 @@ Look up case(s) by short case number (e.g. `26-10543`).
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `short_case_number` | string | yes | Short case number |
-| `court_id` | string | no | Court filter |
+| `court` | string | no | Court name as returned on a case, for example `Delaware` |
 | `court_state` | string | no | Two-letter state |
 | `live_update` | boolean | no | One-time refresh from court sources (subscribers) |
 
@@ -132,16 +132,16 @@ Cases filed in a date range on `dateFiled`. Omitting both dates defaults to yest
 
 #### `get_docket_entries_tool`
 
-Docket entries for a case, ordered by `itemNumber` ascending. Each entry includes the full PACER `itemText` (never sliced) and `docket_id` for document tools. `limit` is capped at 50; use `skip` (or `offset`, or 1-based `page`) to walk past the first block. Optional `docket_id`, `item_number`, or `item_from`/`item_to` fetch specific entries. A page may contain fewer than `limit` entries so every caption stays complete for MCP clients. The response includes `total`, `skip`, `limit`, `returned`, and `has_more`.
+Docket entries for a case, ordered by `itemNumber` ascending. Each entry includes the full PACER `itemText` (never sliced). The response identifies the case by `simpleName` and each filing by `itemNumber`. It does not include `caseId` or `docketId`. `limit` is capped at 50; use `skip` (or `offset`, or 1-based `page`) to walk past the first block. Optional `item_number` or `item_from`/`item_to` fetch specific entries. `docket_id` is accepted only as an input filter when the caller already has one. A page may contain fewer than `limit` entries so every caption stays complete for MCP clients. The response includes `total`, `skip`, `limit`, `returned`, and `has_more`.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `simple_name` | string | Case simpleName (preferred) |
+| `simple_name` | string | Case simpleName (preferred). `simpleName` is accepted as an alias |
 | `case_number` | string | Short or full case number |
 | `short_case_number` | string | Alias for `case_number` |
-| `court_id` | string | Optional court filter |
+| `court` | string | Court name as returned on a case, for example `Delaware` |
 | `court_state` | string | Two-letter state to disambiguate |
-| `docket_id` | string | Return only this docket entry (full `itemText`) |
+| `docket_id` | string | Optional input filter for one entry the caller already knows. Not returned |
 | `item_number` | integer | Return only this docket item number (full `itemText`) |
 | `item_from` | integer | Filter to `itemNumber >=` this value |
 | `item_to` | integer | Filter to `itemNumber <=` this value |
@@ -173,8 +173,37 @@ Add a case to your monitoring list (hourly court checks, daily docket updates).
 |-----------|------|-------------|
 | `simple_name` | string | Case simpleName |
 | `case_number` | string | 7-digit short case number alternative |
+| `court` | string | Court name as returned on a case, for example `Delaware` |
 | `court_state` | string | Two-letter state to disambiguate |
-| `court_id` | string | Optional court filter |
+
+#### `case_status`
+
+Refresh one case from the court case summary and return the dates the court has on file. This calls the court, so use it for one case at a time. Single Case plan: monitored cases only.
+
+The response identifies the case by `simpleName` and includes `name`, `chapter`, and `dates`. `dates` contains only the fields that have a value:
+
+| Date field | Meaning |
+|------------|---------|
+| `dateFiled` | Date filed |
+| `dateLastFiling` | Date of the latest filing |
+| `dateConverted` | Date the case converted |
+| `datePlanConfirmed` | Date the plan was confirmed |
+| `dateDischarged` | Debtor discharge date |
+| `dateDischargedJoint` | Joint debtor discharge date |
+| `dateDismissed` | Debtor dismissal date |
+| `dateDismissedJoint` | Joint debtor dismissal date |
+| `dateTerminated` | Date terminated |
+| `dateClosed` | Date closed |
+| `dateUpdated` | When this summary was saved |
+
+A calendar date is `YYYY-MM-DD`. A value that is not midnight keeps its time.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `simple_name` | string | Case simpleName. `simpleName` is accepted as an alias |
+| `case_number` | string | 7-digit short case number |
+| `court` | string | Court name as returned on a case, for example `Delaware` |
+| `court_state` | string | Two-letter state |
 
 #### `refresh_docket_tool`
 
@@ -184,8 +213,8 @@ Request an immediate docket refresh from court sources.
 |-----------|------|-------------|
 | `simple_name` | string | Case simpleName |
 | `case_number` | string | 7-digit short case number |
+| `court` | string | Court name as returned on a case, for example `Delaware` |
 | `court_state` | string | Two-letter state |
-| `court_id` | string | Optional court filter |
 
 #### `get_recent_developments_tool`
 
@@ -201,9 +230,9 @@ Docket entries since a date (default: last 7 days) for one monitored case or all
 
 Recommended flow:
 
-1. `get_docket_entries_tool` → obtain `docket_id`
-2. `get_document_tool` with `docket_id` only → cost preview
-3. User confirms → `get_document_tool` with `accept_charge: true` → signed PDF URL
+1. `get_docket_entries_tool` → `simpleName` and `itemNumber`
+2. `get_document_tool` with `simple_name` and `item_number` → cost preview
+3. User confirms → the same arguments plus `accept_charge: true` → signed PDF URL
 
 #### `get_document_cost_tool`
 
@@ -217,9 +246,9 @@ Shared parameters for document tools:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `docket_id` | string | Preferred: 40-character hex hash from docket tools |
-| `simple_name` | string | Legacy: case simpleName (use with `item_number`) |
-| `item_number` | integer | Legacy: docket item number |
+| `simple_name` | string | Case simpleName. Use with `item_number` |
+| `item_number` | integer | Docket item number. Use with `simple_name` |
+| `docket_id` | string | Optional, when the caller already has a docket entry id. Responses still identify the filing by `simpleName` and `item_number` |
 | `accept_charge` | boolean | `true` after user approves cost |
 | `download` | boolean | Legacy alias for `accept_charge: true` |
 
