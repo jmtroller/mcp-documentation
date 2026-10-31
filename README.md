@@ -8,6 +8,14 @@ All servers use **Streamable HTTP** (JSON-RPC 2.0 over HTTPS). A typical session
 
 `initialize` → `notifications/initialized` (optional) → `tools/list` → `tools/call`
 
+## Google Connected Apps
+
+Each public host answers `GET` and `HEAD` `/.well-known/google-connected-apps` with `{"verification_tokens":["…"]}` after that host's token is placed in server storage. Until then the route returns `verification_not_configured`.
+
+`initialize` negotiates `2025-11-25`, `2025-06-18`, or `2025-03-26`, and otherwise answers `2025-03-26`. The result includes corpus `instructions` and does not name tools. Every tool in `tools/list` carries `readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`, and a `title`.
+
+Nursing Home Database, FindSeniorMed, and SeniorHealthDatabase stay public: no OAuth, and their server cards do not advertise an authorization server. A `GET` of `/mcp` on those hosts can return 405; clients should `POST`. Bankruptcy Observer uses OAuth. An invalid `Authorization: Bearer` token is HTTP 401 with `WWW-Authenticate`. A request with no bearer token can still use the free lookups.
+
 ## Servers
 
 | Server | Directory | Endpoint | Auth |

@@ -47,6 +47,8 @@ curl -X POST "https://mcp.trollerbk.com/mcp?api_key=YOUR_TOKEN" \
 
 API tokens are obtained via subscription (subscriber dashboard MCP setup shows a copyable Grok URL). Requests without valid credentials return a JSON-RPC auth error (HTTP 401).
 
+The authorize page takes a pasted API token. It does not ask for an email and password. `redirect_uri` must exactly match a URI registered for that client. Dynamic registration rejects a non-https URI, and a Google host that is not an official `oauth-redirect` prefix with an `/r/` or `/a/` path. Refresh tokens rotate, except a client registered with an official Google redirect keeps the same refresh token and gets a new access token. Revoking a refresh token also revokes its access token.
+
 OAuth discovery endpoints are available at the MCP host root:
 
 - `GET https://mcp.trollerbk.com/.well-known/oauth-authorization-server`

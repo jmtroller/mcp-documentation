@@ -15,13 +15,14 @@ Public documentation for the **Bankruptcy Observer** [Model Context Protocol](ht
 | **URL** | `https://mcp.bankruptcyobserver.com/mcp` |
 | **Auth** | Optional — free tier works without credentials; paid tools require a subscriber MCP token |
 | **Server name** | `bko-mcp` |
+| **Version** | `1.5.0` |
 
 Send a standard MCP session: `initialize` → `notifications/initialized` (optional) → `tools/list` → `tools/call`.
 
 ## Authentication
 
-The BKO middleware never returns HTTP 401. Instead:
-
+- **Invalid `Authorization: Bearer` token:** HTTP 401 and `WWW-Authenticate: Bearer resource_metadata="https://mcp.bankruptcyobserver.com/.well-known/oauth-protected-resource", error="invalid_token"`.
+- **No bearer token:** free lookups stay HTTP 200. A paid tool returns a sign-in-required tool result, not an HTTP 401. A bad `X-API-Key` or URL token follows that same path.
 - **Free tier (no auth):** Limited lookups for exact debtor name (no `*` wildcard) and 7-digit case numbers.
 - **Subscriber (auth required for full data):** Pass your MCP API token via:
   - `Authorization: Bearer <api_token>`
@@ -33,6 +34,14 @@ The BKO middleware never returns HTTP 401. Instead:
     - Prefer headers/OAuth when available; treat the full URL as a secret.
 
 Website subscribers get MCP access included. Tokens are visible in the subscriber dashboard at `/subscriber/mcp-setup`. New users can also call `list_plans_tool` and `purchase_plan_tool` without auth to start Stripe checkout.
+
+OAuth sign-in on Bankruptcy Observer accepts the account email and password, then an Allow / Deny step. `?mode=token` still accepts a pasted API token in one step, which is what existing Claude and ChatGPT clients use. TrollerBk stays on the token paste. `redirect_uri` must exactly match a URI registered for that client. Dynamic registration rejects a non-https URI, and a Google host that is not an official `oauth-redirect` prefix with an `/r/` or `/a/` path.
+
+Google clients keep the same refresh token and receive a new access token; the refresh expiry slides about 180 days. Other clients still rotate the refresh token. Revoking a refresh token also revokes its access token.
+
+EIN lookup, case-number lookup, and docket lookup read the stored record. They do not take `live_update`. Court refresh is `refresh_docket_tool` and `get_case_status_tool`. `get_document_cost_tool` is preview only and does not take `accept_charge` or `download`. Those flags remain on `get_document_tool`. `check_subscription_tool` takes no arguments.
+
+Domain verification is `GET` or `HEAD` `https://mcp.bankruptcyobserver.com/.well-known/google-connected-apps`. Privacy: [bankruptcyobserver.com/privacy](https://www.bankruptcyobserver.com/privacy). Terms: [bankruptcyobserver.com/legal](https://www.bankruptcyobserver.com/legal).
 
 ## Subscription tiers
 
@@ -69,9 +78,8 @@ Look up case(s) by short case number (e.g. `26-10543`).
 | `short_case_number` | string | yes | Short case number |
 | `court` | string | no | Court name as returned on a case, for example `Delaware` |
 | `court_state` | string | no | Two-letter state |
-| `live_update` | boolean | no | One-time refresh from court sources (subscribers) |
 
-**Free:** 7-digit format returns limited fields across all courts. **Paid:** full data, `live_update`, court filters.
+**Free:** 7-digit format returns limited fields across all courts. **Paid:** full data and court filters. This lookup does not contact the court.
 
 ### Paid search tools (Full Access Agent)
 
@@ -83,7 +91,6 @@ Look up cases by debtor EIN.
 |-----------|------|----------|-------------|
 | `debtor_ein` | string | yes | Employer Identification Number |
 | `include_last_filing` | boolean | no | Include `lastFilingDate` from docket |
-| `live_update` | boolean | no | One-time source refresh (subscribers) |
 
 #### `get_cases_by_industry_tool`
 
@@ -149,17 +156,6 @@ Docket entries for a case, ordered by `itemNumber` ascending. Each entry include
 | `skip` | integer | Number of entries to skip (default 0). Example: `limit=50, skip=50` returns items 51–100 |
 | `offset` | integer | Alias for `skip` |
 | `page` | integer | 1-based page; equivalent to `skip=(page-1)*limit`. Ignored if `skip` or `offset` is set |
-| `live_update` | boolean | Refresh from court sources first |
-
-#### `get_case_summary_tool`
-
-Plain-English structured summary: debtor, chapter, court, key dates, asset/liability ranges, nature of business, judge, and AI-extracted profile data when available.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `simple_name` | string | Case simpleName (preferred) |
-| `case_number` | string | 7-digit short case number |
-| `court_state` | string | Two-letter state to disambiguate |
 
 #### `list_monitored_cases_tool`
 
@@ -176,7 +172,7 @@ Add a case to your monitoring list (hourly court checks, daily docket updates).
 | `court` | string | Court name as returned on a case, for example `Delaware` |
 | `court_state` | string | Two-letter state to disambiguate |
 
-#### `case_status`
+#### `get_case_status_tool`
 
 Refresh one case from the court case summary and return the dates the court has on file. This calls the court, so use it for one case at a time. Single Case plan: monitored cases only.
 
@@ -196,7 +192,7 @@ The response identifies the case by `simpleName` and includes `name`, `chapter`,
 | `dateClosed` | Date closed |
 | `dateUpdated` | When this summary was saved |
 
-A calendar date is `YYYY-MM-DD`. A value that is not midnight keeps its time.
+Each date is `YYYY-MM-DD`. `dateUpdated` is the calendar date the summary was saved.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
@@ -242,15 +238,15 @@ Preview cost to download a court filing PDF. Does not pull or charge.
 
 Court filing PDF. Omit `accept_charge`/`download` for preview; set `accept_charge: true` or `download: true` after user confirms.
 
-Shared parameters for document tools:
+`get_document_cost_tool` accepts `simple_name`, `item_number`, and `docket_id` only. `accept_charge` and `download` belong on `get_document_tool`.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `simple_name` | string | Case simpleName. Use with `item_number` |
 | `item_number` | integer | Docket item number. Use with `simple_name` |
 | `docket_id` | string | Optional, when the caller already has a docket entry id. Responses still identify the filing by `simpleName` and `item_number` |
-| `accept_charge` | boolean | `true` after user approves cost |
-| `download` | boolean | Legacy alias for `accept_charge: true` |
+| `accept_charge` | boolean | `get_document_tool` only. `true` after the user approves the cost |
+| `download` | boolean | `get_document_tool` only. Alias for `accept_charge: true` |
 
 > Note: `get_document_cost` is a dispatch alias of `get_document_cost_tool` but is filtered out of `tools/list` to avoid duplicate catalog entries.
 
@@ -271,11 +267,7 @@ Get a Stripe checkout URL for a plan. **No auth required.**
 
 #### `check_subscription_tool`
 
-Check MCP subscription status and remaining quota.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `api_key` | string | Optional; uses request credentials if omitted |
+Check the signed-in subscriber plan and remaining quota. No parameters. A missing bearer token returns a sign-in-required tool result.
 
 ## MCP Registry
 

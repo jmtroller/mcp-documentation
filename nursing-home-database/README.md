@@ -24,9 +24,9 @@ Send a standard MCP session: `initialize` → `notifications/initialized` (optio
 |------|---------|
 | `search_facilities` | Finds certified SNFs near an address (or by name/city/state/ownership type) so you can shortlist more than three homes using hours, turnover, and inspection scores |
 | `search_facilities_by_ownership` | Same search, with CMS `ownership` type required (For profit / Non profit / Government, or an exact value from `list_distinct_values`) |
-| `summarize_facilities` | National or grouped stats (n, mean, min, max; optional median) for nurse hours, turnover, ratings, beds, fines. Prefer this over paging `search_facilities` |
+| `summarize_facilities` | National or grouped stats (n, mean, min, max; optional median) for nurse hours, turnover, ratings, beds, fines |
 | `get_facility` | Opens one home by CMS provider number or site slug, with the same hours, turnover, inspection, beds, and penalty fields as search |
-| `compare_facilities` | Same schema for up to 25 CCNs/slugs — prefer this over looping `get_facility` (MCP is 60 req/min) |
+| `compare_facilities` | Same fields for up to 25 CCNs or slugs in one response |
 | `get_facility_changes` | Field-level diff of one home across two CMS monthly files. Defaults to the latest file versus the prior snapshot. Not owner names |
 | `get_facility_ownership` | Lists who owns a home and in what role |
 | `search_owners` | Finds nursing-home owners by name |
@@ -41,10 +41,10 @@ Exact `inputSchema` objects are returned in `tools/list`.
 
 By default every lookup uses the **latest** CMS monthly file. To retrieve a prior month:
 
-1. Call `list_file_dates` (returns `current`, `filedates` newest first, and `known_gaps` for unpublished months).
+1. `list_file_dates` returns `current`, `filedates` newest first, and `known_gaps` for unpublished months.
 2. Pass one of those dates as `filedate` (`YYYY-MM-DD` or `YYYY-MM`) on `search_facilities`, `search_facilities_by_ownership`, `summarize_facilities`, `compare_facilities`, `get_facility`, `get_facility_ownership`, `search_owners`, `get_owner`, or `list_distinct_values`. `get_facility_changes` does not take `filedate`; pass `from` and `to`.
 
-CMS snapshots are stored as the first of the month (`YYYY-MM-01`). A value like `2026-07` or `2026-07-15` is normalized to `2026-07-01`. Unknown dates return a validation error — call `list_file_dates` rather than guessing.
+CMS snapshots are stored as the first of the month (`YYYY-MM-01`). A value like `2026-07` or `2026-07-15` is normalized to `2026-07-01`. An unknown date returns a validation error. Use a `YYYY-MM-DD` date that is loaded.
 
 ### `search_facilities`
 
@@ -142,7 +142,7 @@ Same result schema as `search_facilities`, with `ownership` required. Use this w
 
 ### `summarize_facilities`
 
-Aggregate numeric CMS ProviderInfo fields across certified SNFs. Prefer this over paging `search_facilities` for national or grouped stats (government vs private hours, state means, etc.). Means are **facility-equal** (not bed-weighted). Facilities missing a metric are excluded from that metric’s n/mean/min/max only — values are not imputed. Not causal. Not a substitute for `get_facility` on a named home.
+Aggregate numeric CMS ProviderInfo fields across certified nursing homes (government vs private hours, state means, and similar groupings). Means are **facility-equal** (not bed-weighted). Facilities missing a metric are excluded from that metric’s n/mean/min/max only — values are not imputed. Not causal. A named home still needs a single-facility lookup.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -239,7 +239,11 @@ Lists CMS monthly snapshot dates available in the database. No parameters. Retur
 
 ### `get_data_freshness`
 
-Reports latest CMS source dataset dates and row counts. No parameters. For a prior month, call `list_file_dates` and pass `filedate` to the other tools.
+Reports latest CMS source dataset dates and row counts. No parameters. A prior month uses one of the loaded dates as `filedate`.
+
+## Google Connected Apps
+
+There is no OAuth on this host. `initialize` returns corpus instructions and a favicon. Every tool includes hint annotations. An address search is geocoded with the U.S. Census geocoder; `distance_miles` is straight-line miles. `GET /mcp` may return 405; use `POST`. Domain verification is `/.well-known/google-connected-apps`. Privacy: [nursinghomedatabase.com/privacy](https://www.nursinghomedatabase.com/privacy). Terms: [nursinghomedatabase.com/terms](https://www.nursinghomedatabase.com/terms).
 
 ## MCP Registry
 

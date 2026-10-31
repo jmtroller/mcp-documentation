@@ -1,9 +1,9 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "com.findseniormed/mcp",
-  "title": "FindSeniorMed / FindMed",
-  "description": "FindSeniorMed MCP: search doctors, specialists, and provider groups for senior care. Public access.",
-  "version": "1.0.1",
+  "title": "FindSeniorMed",
+  "description": "Medicare clinicians by name, specialty, NPI, and 2024 MIPS. Public access.",
+  "version": "1.0.0",
   "websiteUrl": "https://jmtroller.github.io/mcp-documentation/findseniormed/",
   "repository": {
     "url": "https://github.com/jmtroller/mcp-documentation",

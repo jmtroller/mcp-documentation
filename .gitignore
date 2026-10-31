@@ -4,3 +4,12 @@ _site/
 .jekyll-metadata
 vendor/
 Gemfile.lock
+
+# Secrets / keys — PUBLIC repo, never commit these
+*.pem
+*.key
+key.pem
+
+# AI agent docs — keep internal, do not publish
+CLAUDE.md
+.claude/

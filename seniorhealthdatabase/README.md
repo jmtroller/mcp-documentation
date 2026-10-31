@@ -14,6 +14,7 @@ Public documentation for the **SeniorHealthDatabase** [Model Context Protocol](h
 | **URL** | `https://mcp.seniorhealthdatabase.com/mcp` (recommended) |
 | **Auth** | None required (public access) |
 | **Server name** | `seniorhealth-mcp` |
+| **Version** | `1.1.0` |
 
 Domain aliases also work:
 
@@ -29,7 +30,7 @@ Search healthcare facilities. Filter by type, location, ratings.
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `q` | string | Search term (name, city, etc.) |
-| `type` | string | `dialysis` (default), `home_health`, `hospice`, or `hospital` |
+| `type` | string | Required. `hospital`, `home_health`, `hospice`, or `dialysis` |
 | `state` | string | Two-letter state abbreviation |
 | `city` | string | City name |
 | `min_rating` | number | Minimum overall/star rating filter |
@@ -42,9 +43,20 @@ Get detailed ratings and information for a specific facility.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `id` | string | yes | Facility identifier |
-| `type` | string | no | Optional type hint: `dialysis`, `home_health`, `hospice`, or `hospital` |
+| `type` | string | yes | `hospital`, `home_health`, `hospice`, or `dialysis` |
+| `filedate` | string | no | `YYYY-MM-DD` snapshot. Defaults to the latest loaded file |
 
-When `type` is omitted, the server tries dialysis, home health, hospice, and hospital lookups in sequence.
+### `compare_facilities`
+
+Compare 2–10 facilities of one type. Returns the detail rows plus mechanical high and low extremes on key metrics. That summary has no overall ranking. `ids` and `type` are required. `filedate` is optional.
+
+### `get_facility_changes`
+
+Diff `overall_rating`, ratings, and measures for one facility between two snapshots. `id` and `type` are required. `from` and `to` default to the prior snapshot and the latest loaded file.
+
+### `list_file_dates`
+
+Snapshot dates loaded for one facility type, including latest and prior. `type` is optional.
 
 ### `get_data_freshness`
 
@@ -69,6 +81,10 @@ Listed (or published) in the official MCP Registry as **`com.seniorhealthdatabas
   }
 }
 ```
+
+## Google Connected Apps
+
+There is no OAuth. `initialize` returns corpus instructions (server version `1.1.0`) and a favicon. Every tool includes hint annotations. An address plus `radius_miles` is geocoded with Mapbox and returns straight-line miles. A ZIP plus radius uses stored coordinates and does not leave the server. `GET /mcp` may return 405; use `POST`. Domain verification is `/.well-known/google-connected-apps`. Privacy: [seniorhealthdatabase.com/privacy](https://www.seniorhealthdatabase.com/privacy). Terms: [seniorhealthdatabase.com/terms](https://www.seniorhealthdatabase.com/terms).
 
 ## License and data
 
